@@ -293,6 +293,31 @@ mark.cat-style { color: var(--style); background: rgba(100, 116, 139, 0.08); tex
 .progress i.cur { background: var(--accent); }
 
 /* ------------------------------------------------------------------ */
+/*  Режим ученика (открывается по ссылке на телефоне)                  */
+/* ------------------------------------------------------------------ */
+
+.student-shell {
+  min-height: 100vh; display: flex; align-items: flex-start; justify-content: center;
+  padding: 20px 14px 40px;
+  background: radial-gradient(1200px 400px at 50% -120px, #e8efff 0%, var(--bg) 60%);
+}
+.student-card {
+  width: 100%; max-width: 720px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; margin-top: 12px;
+}
+.student-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 12px; }
+.student-title { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
+.student-body { padding: 16px 18px 18px; }
+.student-foot { padding: 12px 18px 16px; border-top: 1px solid var(--line-2); }
+.student-verdict { margin-top: 16px; padding: 12px 14px; border-radius: 12px; font-weight: 650; font-size: 14.5px; }
+.student-verdict.good { background: #e7f7ef; color: #0b7a48; border: 1px solid #b9e6cf; }
+.student-verdict.bad { background: #fdecec; color: #b3282c; border: 1px solid #f6c9ca; }
+.student-done { text-align: center; padding: 34px 24px; }
+.student-emoji { font-size: 52px; line-height: 1; }
+.student-done h2 { margin: 14px 0 6px; font-size: 20px; letter-spacing: -0.01em; }
+.student-score { font-size: 17px; font-weight: 650; color: var(--accent); margin: 0 0 6px; }
+
+/* ------------------------------------------------------------------ */
 /*  Ученики                                                            */
 /* ------------------------------------------------------------------ */
 

@@ -4,19 +4,32 @@ import { analyze, applyAllFixes, applyFix } from './engine/analyze'
 import { addWords, initSpell, spellReady } from './engine/spell'
 import { taskType } from './engine/taskTypes'
 import { buildReportText } from './lib/report'
+import { api, trainerLink, useAssignments } from './lib/api'
 import { copyToClipboard, download, makeCheck, useChecks, usePersonalWords, useSettings, useStudents } from './lib/storage'
 import Sidebar from './components/Sidebar'
 import CheckView from './components/CheckView'
 import StudentsView from './components/StudentsView'
+import AssignmentsView from './components/AssignmentsView'
+import StudentTrainer from './components/StudentTrainer'
 
-type View = 'check' | 'students'
+type View = 'check' | 'students' | 'assignments'
+
+type Route = { name: 'app' } | { name: 'train'; code: string }
+
+function parseRoute(): Route {
+  if (typeof window === 'undefined') return { name: 'app' }
+  const match = window.location.hash.match(/^#\/train\/([A-Za-z0-9]{4,12})$/)
+  return match ? { name: 'train', code: match[1].toUpperCase() } : { name: 'app' }
+}
 
 export default function App() {
+  const [route, setRoute] = useState<Route>(() => parseRoute())
   const [view, setView] = useState<View>('check')
   const { students, update: setStudents } = useStudents()
   const { checks, update: setChecks } = useChecks()
   const { settings, save: saveSettings } = useSettings()
   const { words: personalWords, update: setPersonalWords } = usePersonalWords()
+  const { assignments, state: apiState, refresh: refreshAssignments } = useAssignments(route.name === 'app')
 
   const [text, setText] = useState('')
   const [topic, setTopic] = useState(settings.topic)
@@ -28,6 +41,12 @@ export default function App() {
   const [saved, setSaved] = useState(false)
   const [toast, setToast] = useState('')
   const [spellStatus, setSpellStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+
+  useEffect(() => {
+    const onHashChange = () => setRoute(parseRoute())
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
 
   useEffect(() => {
     initSpell().then(() => setSpellStatus('ready')).catch(() => setSpellStatus('error'))
@@ -58,8 +77,7 @@ export default function App() {
     setShowFixes(false)
     setChecked({ text, taskType: taskTypeId })
     window.setTimeout(() => {
-      const panel = document.getElementById('results')
-      panel?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      document.getElementById('results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 60)
   }
 
@@ -140,6 +158,33 @@ export default function App() {
     notify('Все исправления внесены — текст можно проверить заново')
   }
 
+  async function createAssignment() {
+    if (!analysis) throw new Error('Сначала проверьте работу')
+    const created = await api.createAssignment({
+      studentId: activeStudentId,
+      studentName: student?.name ?? '',
+      title: `Тренажёр: ${tt.short}${topic ? ` — ${topic.slice(0, 60)}` : ''}`,
+      taskLabel: tt.short,
+      topic,
+      band: analysis.band,
+      exercises: analysis.exercises,
+    })
+    await refreshAssignments()
+    notify('Ссылка для ученика готова')
+    return trainerLink(created.code)
+  }
+
+  async function removeAssignment(code: string) {
+    await api.removeAssignment(code)
+    await refreshAssignments()
+    notify('Задание удалено')
+  }
+
+  // Ученик открыл ссылку тренажёра — показываем ему отдельный экран
+  if (route.name === 'train') return <StudentTrainer code={route.code} />
+
+  const resultsCount = assignments.filter((a) => a.submissions.length).length
+
   return (
     <div className="app">
       <Sidebar
@@ -149,17 +194,21 @@ export default function App() {
         checks={checks}
         spellStatus={spellStatus}
         onPickStudent={(id) => { setActiveStudentId(id); setView('check') }}
+        resultsCount={resultsCount}
+        apiState={apiState}
       />
       <main className="main">
         <div className="page-head no-print">
           <div>
             <h1 className="page-title">
-              {view === 'check' ? 'Проверка письменной работы' : 'Ученики и прогресс'}
+              {view === 'check' ? 'Проверка письменной работы' : view === 'students' ? 'Ученики и прогресс' : 'Задания ученикам'}
             </h1>
             <div className="page-sub">
               {view === 'check'
                 ? 'Вставьте текст — приложение найдёт ошибки, оценит работу по критериям и соберёт упражнения.'
-                : 'Ошибки, которые повторяются от работы к работе, и готовый план следующего урока.'}
+                : view === 'students'
+                  ? 'Ошибки, которые повторяются от работы к работе, и готовый план следующего урока.'
+                  : 'Ссылки на тренажёры и результаты, которые выполнили ученики.'}
             </div>
           </div>
           <div className="row">
@@ -169,7 +218,7 @@ export default function App() {
         </div>
 
         {view === 'check' ? (
-          <div id="results-anchor">
+          <div id="results">
             <CheckView
               analysis={analysis}
               analysisText={checked?.text ?? ''}
@@ -205,9 +254,10 @@ export default function App() {
               spellStatus={spellStatus}
               onOpenStudents={() => setView('students')}
               notify={notify}
+              onCreateAssignment={createAssignment}
             />
           </div>
-        ) : (
+        ) : view === 'students' ? (
           <StudentsView
             students={students}
             studentsUpdate={setStudents}
@@ -216,6 +266,14 @@ export default function App() {
             onOpenCheck={openCheck}
             onStartCheckFor={startFor}
             onCopy={copy}
+          />
+        ) : (
+          <AssignmentsView
+            assignments={assignments}
+            state={apiState}
+            onRefresh={refreshAssignments}
+            onCopy={copy}
+            onRemove={removeAssignment}
           />
         )}
       </main>

@@ -7,6 +7,8 @@ import ResultsPanel from '../src/components/ResultsPanel'
 import StudentsView from '../src/components/StudentsView'
 import TrainerView from '../src/components/TrainerView'
 import Sidebar from '../src/components/Sidebar'
+import AssignmentsView from '../src/components/AssignmentsView'
+import StudentTrainer from '../src/components/StudentTrainer'
 import { analyze } from '../src/engine/analyze'
 import { SAMPLES } from '../src/data/samples'
 import { makeCheck } from '../src/lib/storage'
@@ -44,7 +46,7 @@ const cases: [string, () => string][] = [
           activeStudentId: 's1', setActiveStudentId: noop, personalWords: ['Vanya'], setPersonalWords: noop,
           dismissed: [], setDismissed: noop, spelled: 1, onCheck: noop, onApplyFix: noop, onApplyAll: noop,
           onCopy: noop, onDownload: noop, onSave: noop, saved: false, showFixes: false, setShowFixes: noop,
-          spellStatus: 'ready', onOpenStudents: noop, notify: noop,
+          spellStatus: 'ready', onOpenStudents: noop, notify: noop, onCreateAssignment: async () => 'https://example.com/#/train/ABCD1234',
         }),
       ),
   ],
@@ -55,7 +57,7 @@ const cases: [string, () => string][] = [
         createElement(ResultsPanel, {
           analysis, text: sample.text, showFixes: false, saved: false, onApplyFix: noop, onApplyAll: noop,
           onDismissRule: noop, onCopy: noop, onDownload: noop, onSave: noop, hiddenRules: [], onRestoreRules: noop,
-          onToggleFixes: noop,
+          onToggleFixes: noop, onCreateAssignment: async () => 'https://example.com/#/train/ABCD1234',
         }),
       ),
   ],
@@ -71,8 +73,25 @@ const cases: [string, () => string][] = [
       ),
   ],
   [
-    'Sidebar',
-    () => renderToString(createElement(Sidebar, { view: 'check', setView: noop, students: [student], checks: [check], spellStatus: 'ready', onPickStudent: noop })),
+    'AssignmentsView (есть результат)',
+    () =>
+      renderToString(
+        createElement(AssignmentsView, {
+          assignments: [
+            {
+              code: 'ABC123', studentId: 's1', studentName: 'Иван', title: 'Тренажёр: IELTS T2', taskLabel: 'IELTS T2',
+              topic: 'social media', band: 5.5, createdAt: Date.now(), exercises: analysis.exercises,
+              submissions: [{ id: 'x1', studentName: 'Иван', right: 1, total: analysis.exercises.length, startedAt: Date.now() - 60000, finishedAt: Date.now(), answers: [{ id: analysis.exercises[0].id, given: 'wrong', correct: false }] }],
+              lastSubmission: null, best: 20,
+            },
+          ],
+          state: 'ready', onRefresh: noop, onCopy: noop, onRemove: noop,
+        }),
+      ),
+  ],
+  ['AssignmentsView (сервер выключен)', () => renderToString(createElement(AssignmentsView, { assignments: [], state: 'offline', onRefresh: noop, onCopy: noop, onRemove: noop }))],
+  ['Sidebar',
+    () => renderToString(createElement(Sidebar, { view: 'check', setView: noop, students: [student], checks: [check], spellStatus: 'ready', onPickStudent: noop, resultsCount: 1, apiState: 'ready' })),
   ],
 ]
 

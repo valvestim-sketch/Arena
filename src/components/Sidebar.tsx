@@ -2,15 +2,17 @@ import type { SavedCheck, Student } from '../types'
 import { plural } from '../lib/storage'
 
 interface Props {
-  view: 'check' | 'students'
-  setView: (v: 'check' | 'students') => void
+  view: 'check' | 'students' | 'assignments'
+  setView: (v: 'check' | 'students' | 'assignments') => void
   students: Student[]
   checks: SavedCheck[]
   spellStatus: 'loading' | 'ready' | 'error'
   onPickStudent: (id: string) => void
+  resultsCount: number
+  apiState: 'loading' | 'ready' | 'offline'
 }
 
-export default function Sidebar({ view, setView, students, checks, spellStatus, onPickStudent }: Props) {
+export default function Sidebar({ view, setView, students, checks, spellStatus, onPickStudent, resultsCount, apiState }: Props) {
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -28,6 +30,10 @@ export default function Sidebar({ view, setView, students, checks, spellStatus, 
         <button className={view === 'students' ? 'active' : ''} onClick={() => setView('students')}>
           Ученики
           <span className="badge">{students.length}</span>
+        </button>
+        <button className={view === 'assignments' ? 'active' : ''} onClick={() => setView('assignments')}>
+          Задания ученикам
+          {resultsCount ? <span className="badge">{resultsCount}</span> : null}
         </button>
       </nav>
 
@@ -59,6 +65,14 @@ export default function Sidebar({ view, setView, students, checks, spellStatus, 
         <div className="status">
           <span className="dot ok" />
           Данные хранятся в браузере
+        </div>
+        <div className="status">
+          <span className={`dot${apiState === 'ready' ? ' ok' : ''}`} />
+          {apiState === 'ready'
+            ? 'Задания ученикам: на связи'
+            : apiState === 'loading'
+              ? 'Проверяем сервер заданий…'
+              : 'Сервер заданий выключен'}
         </div>
         <div className="side-label">Проверок: {checks.length}</div>
       </div>

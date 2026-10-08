@@ -21,6 +21,7 @@ interface Props {
   hiddenRules: string[]
   onRestoreRules: () => void
   onToggleFixes: () => void
+  onCreateAssignment: () => Promise<string>
 }
 
 type Tab = 'issues' | 'report' | 'trainer'
@@ -31,6 +32,9 @@ export default function ResultsPanel(props: Props) {
   const [active, setActive] = useState(0)
   const [report, setReport] = useState(analysis.studentMessage)
   const [editingReport, setEditingReport] = useState(false)
+  const [link, setLink] = useState('')
+  const [assignBusy, setAssignBusy] = useState(false)
+  const [assignError, setAssignError] = useState('')
 
   useEffect(() => {
     setReport(analysis.studentMessage)
@@ -255,7 +259,53 @@ export default function ResultsPanel(props: Props) {
           </>
         ) : null}
 
-        {tab === 'trainer' ? <TrainerView exercises={analysis.exercises} onCopy={props.onCopy} /> : null}
+        {tab === 'trainer' ? (
+          <>
+            <div className="card-pad" style={{ borderBottom: '1px solid var(--line-2)' }}>
+              <div className="row" style={{ alignItems: 'flex-start' }}>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <b>Отдать упражнения ученику</b>
+                  <div className="small muted" style={{ marginTop: 4 }}>
+                    Ссылка открывается на телефоне: ученик отвечает, сразу видит объяснение, а результат приходит сюда,
+                    в раздел «Задания».
+                  </div>
+                </div>
+                {!link ? (
+                  <button
+                    className="btn btn-primary"
+                    disabled={assignBusy || !analysis.exercises.length}
+                    onClick={async () => {
+                      setAssignBusy(true)
+                      setAssignError('')
+                      try {
+                        setLink(await props.onCreateAssignment())
+                      } catch (e) {
+                        setAssignError((e as Error).message)
+                      } finally {
+                        setAssignBusy(false)
+                      }
+                    }}
+                  >
+                    {assignBusy ? 'Создаём…' : 'Отправить ученику'}
+                  </button>
+                ) : null}
+              </div>
+              {link ? (
+                <div className="row" style={{ marginTop: 12 }}>
+                  <input readOnly value={link} onFocus={(e) => e.currentTarget.select()} />
+                  <button className="btn" onClick={() => props.onCopy(link)}>Скопировать</button>
+                  <button className="btn" onClick={() => window.open(link, '_blank', 'noopener')}>Открыть</button>
+                </div>
+              ) : null}
+              {assignError ? (
+                <div className="notice" style={{ marginTop: 12 }}>
+                  {assignError}. Проверьте, что запущен <code>npm run server</code> (или <code>npm run dev</code>).
+                </div>
+              ) : null}
+            </div>
+            <TrainerView exercises={analysis.exercises} onCopy={props.onCopy} />
+          </>
+        ) : null}
       </div>
     </div>
   )

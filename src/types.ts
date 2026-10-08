@@ -120,3 +120,36 @@ export interface SavedCheck {
   criteria: CriterionResult[]
   stats: DocStats
 }
+
+/* ---------- совместный режим: тренажёры для учеников ---------- */
+
+export interface SubmissionAnswer {
+  id: string
+  given: string | null
+  correct: boolean
+}
+
+export interface Submission {
+  id: string
+  studentName: string
+  answers: SubmissionAnswer[]
+  right: number
+  total: number
+  startedAt: number
+  finishedAt: number
+}
+
+export interface Assignment {
+  code: string
+  studentId: string
+  studentName: string
+  title: string
+  taskLabel: string
+  topic: string
+  band: number
+  createdAt: number
+  exercises: Exercise[]
+  submissions: Submission[]
+  lastSubmission?: Submission | null
+  best?: number | null
+}

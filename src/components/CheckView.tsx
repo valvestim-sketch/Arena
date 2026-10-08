@@ -36,6 +36,7 @@ interface Props {
   spellStatus: 'loading' | 'ready' | 'error'
   onOpenStudents: () => void
   notify: (message: string) => void
+  onCreateAssignment: () => Promise<string>
 }
 
 export default function CheckView(props: Props) {
@@ -287,6 +288,7 @@ export default function CheckView(props: Props) {
             hiddenRules={props.dismissed}
             onRestoreRules={() => props.setDismissed([])}
             onToggleFixes={() => props.setShowFixes(!props.showFixes)}
+            onCreateAssignment={props.onCreateAssignment}
           />
           </>
         ) : (
