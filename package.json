@@ -1,0 +1,31 @@
+{
+  "name": "redpen",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "engine:demo": "esbuild scripts/engine-demo.ts --bundle --platform=node --format=esm --outfile=node_modules/.tmp/engine-demo.mjs --define:import.meta.env.BASE_URL='\"/\"' --external:node:* --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\" && DICT_DIR=public/dict node node_modules/.tmp/engine-demo.mjs",
+    "smoke": "esbuild scripts/ssr-smoke.tsx --bundle --platform=node --format=esm --outfile=node_modules/.tmp/smoke.mjs --jsx=automatic --define:import.meta.env.BASE_URL='\"/\"' --external:node:* --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\" && node node_modules/.tmp/smoke.mjs"
+  },
+  "dependencies": {
+    "dictionary-en": "^4.0.0",
+    "nspell": "^2.1.5",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "esbuild": "^0.28.2",
+    "oxlint": "^1.81.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  },
+  "description": "RedPen — ассистент учителя английского: проверка письменных работ, оценка по критериям, упражнения и прогресс учеников"
+}
