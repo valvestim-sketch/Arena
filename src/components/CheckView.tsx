@@ -85,7 +85,7 @@ export default function CheckView(props: Props) {
 
   return (
     <div className="grid-2">
-      <div className="stack">
+      <div className="stack no-print">
         <div className="card card-pad stack">
           <div className="row" style={{ alignItems: 'flex-end' }}>
             <div className="field" style={{ minWidth: 200, flex: 1 }}>

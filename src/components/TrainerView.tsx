@@ -1,5 +1,6 @@
 import type { Category, Exercise } from '../types'
 import { useState } from 'react'
+import { download } from '../lib/storage'
 
 interface Props {
   exercises: Exercise[]
@@ -86,6 +87,7 @@ export default function TrainerView({ exercises, onCopy }: Props) {
           {index + 1} из {exercises.length} · верно {score.right}/{score.done}
         </span>
         <button className="btn btn-sm" onClick={() => onCopy(allText)}>Скопировать все</button>
+        <button className="btn btn-sm" onClick={() => download('упражнения.txt', allText)}>Скачать</button>
       </div>
 
       <div className="exer-card">

@@ -101,6 +101,29 @@ export default function ResultsPanel(props: Props) {
           </div>
         ))}
 
+        <div className="metrics">
+          <div className="metric">
+            <span>Средняя длина предложения</span>
+            <b>{analysis.stats.avgSentenceLength} слов</b>
+          </div>
+          <div className="metric">
+            <span>Сложные конструкции</span>
+            <b>{analysis.stats.advanced.length ? analysis.stats.advanced.slice(0, 2).join('; ') : 'почти нет'}</b>
+          </div>
+          <div className="metric">
+            <span>Связки</span>
+            <b>{analysis.stats.linkers.length ? analysis.stats.linkers.slice(0, 4).join(', ') : 'не найдены'}</b>
+          </div>
+          <div className="metric">
+            <span>Повторы</span>
+            <b>{analysis.stats.repeatedWords.length ? analysis.stats.repeatedWords.slice(0, 3).map((w) => `${w.word} ×${w.count}`).join(', ') : 'нет'}</b>
+          </div>
+          <div className="metric">
+            <span>Абзацев / предложений</span>
+            <b>{analysis.stats.paragraphs} / {analysis.stats.sentences}</b>
+          </div>
+        </div>
+
         <div className="counters">
           {(Object.keys(CATEGORY_NAME) as (keyof typeof CATEGORY_NAME)[]).map((cat) => (
             <div className="counter" key={cat}>

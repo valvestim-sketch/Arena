@@ -39,8 +39,8 @@ export default function Sidebar({ view, setView, students, checks, spellStatus, 
             return (
               <button
                 key={s.id}
-                className="btn btn-ghost btn-sm"
-                style={{ justifyContent: 'flex-start', color: '#c3c8d0' }}
+                className="side-link"
+                title="Открыть проверку для этого ученика"
                 onClick={() => onPickStudent(s.id)}
               >
                 {s.name}
