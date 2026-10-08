@@ -144,11 +144,20 @@ export default function AssignmentsView({ assignments, state, onRefresh, onCopy,
                           )}
                         </div>
                         <p className="exer-q">{exercise.sentence}</p>
-                        {answer?.given && !answer.correct ? (
+                        {answer?.given && !answer.correct && exercise.kind === 'choose' ? (
+                          <div className="small">
+                            Ученик выбрал: <span className="wrong">{answer.given}</span> · правильно:{' '}
+                            <span className="right">{exercise.answer}</span>
+                          </div>
+                        ) : null}
+                        {answer?.given && !answer.correct && exercise.kind === 'fix' ? (
                           <div className="small">
                             Ответ ученика: <span className="wrong">{answer.given}</span> · правильно:{' '}
                             <span className="right">{exercise.answer}</span>
                           </div>
+                        ) : null}
+                        {answer && !answer.correct && !answer.given ? (
+                          <div className="small muted">Ученик пропустил это задание · правильно: {exercise.answer}</div>
                         ) : null}
                         {answer?.correct ? <div className="small muted">Правильно: {exercise.answer}</div> : null}
                         {!answer && !shown ? <div className="small muted">Правильный ответ: {exercise.answer}</div> : null}
